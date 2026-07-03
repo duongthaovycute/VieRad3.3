@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071a3c">
+  <meta name="description" content="VieRad - Hệ thống giám sát và cảnh báo bức xạ thời gian thực.">
+  <title>VieRad | Radiation Monitoring</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/images/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#home" data-i18n-aria-label="homeAria">
+      <img src="assets/images/logo-mark.png" alt="VieRad">
+      <span><b>Vie</b>Rad</span>
+    </a>
+    <button class="menu-button" id="menuButton" type="button" data-i18n-aria-label="openMenu" aria-expanded="false">☰</button>
+    <nav id="mainNav">
+      <a href="#home" data-i18n="navHome">Trang chủ</a>
+      <a href="#monitor" data-i18n="navMonitor">Giám sát</a>
+      <a href="#stations" data-i18n="navStations">Trạm đo</a>
+      <a href="#history" data-i18n="navHistory">Lịch sử</a>
+      <a href="#alerts" data-i18n="navAlerts">Cảnh báo</a>
+      <a href="#download" data-i18n="navDownload">Tải ứng dụng</a>
+      <a href="#about" data-i18n="navAbout">Giới thiệu</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-button" id="themeButton" type="button" data-i18n-title="themeToggle" data-i18n-aria-label="themeToggle">◐</button>
+      <button class="lang-button" id="langButton" type="button" aria-label="English">EN</button>
+      <button class="icon-button" id="settingsButton" type="button" data-i18n-title="settings" data-i18n-aria-label="settings">⚙</button>
+      <a class="header-download" id="headerApkLink" href="downloads/VieRad-current.apk" download>
+        <span data-i18n="downloadApk">Tải APK</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section id="home" class="hero section-shell">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse-dot"></span><span data-i18n="liveSystem">HỆ THỐNG GIÁM SÁT THỜI GIAN THỰC</span></div>
+        <h1><span data-i18n="heroTitleA">Phát hiện sớm.</span><br><span class="gradient-text" data-i18n="heroTitleB">Bảo vệ chủ động.</span></h1>
+        <p data-i18n="heroText">VieRad theo dõi suất liều bức xạ, CPS, CPM và tổng số đếm theo thời gian thực. Dữ liệu được trình bày rõ ràng và không tự chèn số mẫu khi API mất kết nối.</p>
+        <div class="hero-actions">
+          <a href="#monitor" class="primary-button"><span data-i18n="viewLive">Xem dữ liệu trực tiếp</span><span>→</span></a>
+          <a id="heroApkLink" href="downloads/VieRad-current.apk" download class="secondary-button"><span>↓</span><span data-i18n="downloadAndroid">Tải ứng dụng Android</span></a>
+        </div>
+        <div class="trust-row">
+          <div><b id="refreshCycleValue">5s</b><span data-i18n="refreshCycle">Chu kỳ cập nhật</span></div>
+          <div><b>24/7</b><span data-i18n="continuous">Theo dõi liên tục</span></div>
+          <div><b>VI / EN</b><span data-i18n="bilingual">Song ngữ đầy đủ</span></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <img src="assets/images/vierad_brand.png" alt="VieRad Radiation Monitoring">
+        <div class="floating-status">
+          <div class="status-ring"><span id="heroDose">--</span></div>
+          <div><small data-i18n="currentDose">SUẤT LIỀU HIỆN TẠI</small><b>µSv/h</b><span id="heroState" data-i18n="connecting">Đang kết nối...</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="monitor" class="monitor-section section-shell">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker" data-i18n="liveDashboard">LIVE DASHBOARD</span>
+          <h2 data-i18n="monitorTitle">Giám sát bức xạ trực tiếp</h2>
+          <p data-i18n="monitorSubtitle">Dữ liệu thật từ API NEW. Bấm vào bảng lớn để xem toàn bộ thông số.</p>
+        </div>
+        <div class="live-controls">
+          <span class="connection-pill" id="connectionPill"><span></span><b id="connectionText" data-i18n="connecting">Đang kết nối</b></span>
+          <button id="refreshButton" class="icon-button" type="button" data-i18n-title="refresh" data-i18n-aria-label="refresh">↻</button>
+        </div>
+      </div>
+
+      <div class="monitor-layout">
+        <button class="dose-panel level-stale" id="openDetailButton" type="button">
+          <div class="dose-panel-top">
+            <div>
+              <span class="station-label" id="stationName">TRẠM NEW</span>
+              <span class="freshness-label" id="freshnessLabel" data-i18n="waitingDataShort">CHỜ DỮ LIỆU</span>
+            </div>
+            <span class="detail-arrow">↗</span>
+          </div>
+          <div class="dose-main">
+            <div class="radiation-symbol" aria-hidden="true">☢</div>
+            <div class="dose-number-wrap">
+              <span class="dose-caption" data-i18n="currentDose">SUẤT LIỀU HIỆN TẠI</span>
+              <div><strong id="doseValue">--</strong><span>µSv/h</span></div>
+              <p id="lastUpdated">--</p>
+            </div>
+            <div class="risk-badge"><small data-i18n="status">TRẠNG THÁI</small><b id="riskLabel">--</b></div>
+          </div>
+          <div class="tap-hint" data-i18n="tapForDetails">Bấm vào bảng để xem chi tiết tất cả số liệu</div>
+        </button>
+
+        <aside class="quality-card">
+          <div class="quality-head"><span data-i18n="dataQuality">Chất lượng dữ liệu</span><b id="qualityScore">--</b></div>
+          <div class="quality-meter"><span id="qualityBar"></span></div>
+          <dl>
+            <div><dt data-i18n="apiState">API</dt><dd id="qualityApi">--</dd></div>
+            <div><dt data-i18n="sampleAge">Tuổi mẫu</dt><dd id="qualityAge">--</dd></div>
+            <div><dt data-i18n="sensorState">Cảm biến</dt><dd id="qualitySensor">--</dd></div>
+            <div><dt data-i18n="storedSamples">Mẫu đã lưu</dt><dd id="qualityStored">0</dd></div>
+          </dl>
+        </aside>
+      </div>
+
+      <div class="metrics-grid">
+        <article class="metric-card"><span class="metric-icon">◉</span><div><small>CPS</small><strong id="cpsValue">--</strong><p data-i18n="countsPerSecond">Số đếm mỗi giây</p></div></article>
+        <article class="metric-card"><span class="metric-icon">◷</span><div><small>CPM</small><strong id="cpmValue">--</strong><p data-i18n="countsPerMinute">Số đếm mỗi phút</p></div></article>
+        <article class="metric-card"><span class="metric-icon">Σ</span><div><small data-i18n="totalCounts">TỔNG SỐ ĐẾM</small><strong id="totalCountsValue">--</strong><p data-i18n="accumulatedCounts">Số đếm tích lũy</p></div></article>
+        <article class="metric-card"><span class="metric-icon">⌁</span><div><small data-i18n="averageDose">LIỀU TRUNG BÌNH</small><strong id="doseAverageValue">--</strong><p>µSv/h</p></div></article>
+        <article class="metric-card"><span class="metric-icon">℃</span><div><small data-i18n="temperature">NHIỆT ĐỘ</small><strong id="temperatureValue">--</strong><p>°C</p></div></article>
+        <article class="metric-card"><span class="metric-icon">％</span><div><small data-i18n="humidity">ĐỘ ẨM</small><strong id="humidityValue">--</strong><p>%</p></div></article>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div><h3 data-i18n="realtimeChart">Biểu đồ suất liều</h3><p data-i18n="latestSamples">Các mẫu được lưu trên trình duyệt này</p></div>
+          <div class="chart-actions">
+            <div class="segmented" id="chartRangeButtons">
+              <button type="button" data-range="1h">1h</button>
+              <button type="button" data-range="6h">6h</button>
+              <button type="button" data-range="24h" class="active">24h</button>
+              <button type="button" data-range="7d">7d</button>
+              <button type="button" data-range="all" data-i18n="all">Tất cả</button>
+            </div>
+            <div class="chart-value"><span id="chartLatest">--</span><small>µSv/h</small></div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <svg id="doseChart" viewBox="0 0 1000 300" role="img" data-i18n-aria-label="chartAria">
+            <defs>
+              <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#14d9ff" stop-opacity="0.34"/>
+                <stop offset="100%" stop-color="#14d9ff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g class="grid-lines"></g>
+            <path id="chartArea" fill="url(#chartFill)" d=""></path>
+            <path id="chartLine" fill="none" stroke="#2de3ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d=""></path>
+            <circle id="chartPoint" r="7" fill="#fff" stroke="#2de3ff" stroke-width="4" cx="0" cy="0"></circle>
+          </svg>
+          <span class="axis-label axis-max" id="chartMax">--</span>
+          <span class="axis-label axis-min" id="chartMin">--</span>
+          <div class="empty-chart" id="emptyChart" data-i18n="waitingData">Đang chờ dữ liệu từ API...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stations" class="section-shell simple-section">
+      <div class="section-heading">
+        <div><span class="section-kicker" data-i18n="stationsKicker">MEASUREMENT STATIONS</span><h2 data-i18n="stationsTitle">Danh sách trạm đo</h2><p data-i18n="stationsSubtitle">Chọn một trạm để xem số liệu tức thời và thông tin kỹ thuật.</p></div>
+      </div>
+      <div class="station-list" id="stationList"></div>
+      <div class="api-note">
+        <div class="api-note-icon">API</div>
+        <div><b data-i18n="realDataOnly">Chỉ hiển thị dữ liệu thật</b><p data-i18n="realDataNote">Khi API lỗi hoặc không có mẫu hợp lệ, VieRad sẽ báo mất kết nối thay vì tự tạo số liệu.</p></div>
+      </div>
+    </section>
+
+    <section id="history" class="section-shell simple-section">
+      <div class="section-heading">
+        <div><span class="section-kicker" data-i18n="historyKicker">LOCAL HISTORY</span><h2 data-i18n="historyTitle">Lịch sử dữ liệu</h2><p data-i18n="historySubtitle">Lọc, xem lại, nhập/xuất và mở chi tiết từng bản ghi ngay trên trình duyệt.</p></div>
+        <div class="history-actions">
+          <button id="exportCsvButton" class="secondary-button small" type="button" data-i18n="exportCsv">Xuất CSV</button>
+          <button id="exportJsonButton" class="secondary-button small" type="button" data-i18n="exportJson">Xuất JSON</button>
+          <button id="importJsonButton" class="secondary-button small" type="button" data-i18n="importJson">Nhập JSON</button>
+          <input id="importJsonInput" type="file" accept="application/json,.json" hidden>
+          <button id="clearHistoryButton" class="text-button" type="button" data-i18n="clearHistory">Xóa lịch sử</button>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <article><small data-i18n="sampleCount">SỐ MẪU</small><b id="summaryCount">0</b></article>
+        <article><small data-i18n="minimumDose">LIỀU NHỎ NHẤT</small><b id="summaryMin">--</b><span>µSv/h</span></article>
+        <article><small data-i18n="averageDose">LIỀU TRUNG BÌNH</small><b id="summaryAvg">--</b><span>µSv/h</span></article>
+        <article><small data-i18n="maximumDose">LIỀU LỚN NHẤT</small><b id="summaryMax">--</b><span>µSv/h</span></article>
+      </div>
+
+      <div class="filter-card">
+        <label><span data-i18n="station">Trạm</span><select id="historyStationFilter"><option value="all" data-i18n="allStations">Tất cả trạm</option></select></label>
+        <label><span data-i18n="period">Khoảng thời gian</span><select id="historyRangeFilter">
+          <option value="1h">1 giờ</option><option value="6h">6 giờ</option><option value="24h" selected>24 giờ</option><option value="7d">7 ngày</option><option value="30d">30 ngày</option><option value="all" data-i18n="all">Tất cả</option>
+        </select></label>
+        <label><span data-i18n="riskLevel">Mức cảnh báo</span><select id="historyLevelFilter">
+          <option value="all" data-i18n="allLevels">Tất cả mức</option><option value="safe" data-i18n="safe">AN TOÀN</option><option value="caution" data-i18n="caution">CHÚ Ý</option><option value="warning" data-i18n="warning">CẢNH BÁO</option><option value="danger" data-i18n="danger">NGUY HIỂM</option><option value="stale" data-i18n="stale">DỮ LIỆU CŨ</option>
+        </select></label>
+        <label><span data-i18n="fromTime">Từ thời điểm</span><input id="historyFromFilter" type="datetime-local"></label>
+        <label><span data-i18n="toTime">Đến thời điểm</span><input id="historyToFilter" type="datetime-local"></label>
+        <label><span data-i18n="rowsPerPage">Số dòng</span><select id="rowsPerPage"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></label>
+        <button id="resetFiltersButton" class="text-button filter-reset" type="button" data-i18n="resetFilters">Đặt lại bộ lọc</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="time">Thời gian</th><th data-i18n="station">Trạm</th><th data-i18n="doseRate">Suất liều</th><th>CPS</th><th>CPM</th><th data-i18n="totalCounts">Tổng số đếm</th><th data-i18n="status">Trạng thái</th></tr></thead>
+          <tbody id="historyBody"><tr><td colspan="7" class="empty-row" data-i18n="noHistory">Chưa có dữ liệu lịch sử.</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pagination"><button id="prevPageButton" type="button" class="text-button" data-i18n="previous">Trước</button><span id="pageInfo">1 / 1</span><button id="nextPageButton" type="button" class="text-button" data-i18n="next">Sau</button></div>
+      <p class="storage-note" id="storageNote"></p>
+    </section>
+
+    <section id="alerts" class="section-shell simple-section">
+      <div class="section-heading">
+        <div><span class="section-kicker" data-i18n="alertsKicker">ALERT CENTER</span><h2 data-i18n="alertsTitle">Trung tâm cảnh báo</h2><p data-i18n="alertsSubtitle">Tự động tổng hợp các mẫu vượt ngưỡng từ lịch sử đang lưu.</p></div>
+      </div>
+      <div class="threshold-grid">
+        <article class="threshold-safe"><small data-i18n="safe">AN TOÀN</small><b>&lt; <span id="safeThreshold">0.5</span></b><span>µSv/h</span></article>
+        <article class="threshold-caution"><small data-i18n="caution">CHÚ Ý</small><b id="cautionThreshold">0.5–1.0</b><span>µSv/h</span></article>
+        <article class="threshold-warning"><small data-i18n="warning">CẢNH BÁO</small><b id="warningThreshold">1.0–4.0</b><span>µSv/h</span></article>
+        <article class="threshold-danger"><small data-i18n="danger">NGUY HIỂM</small><b>≥ <span id="dangerThreshold">4.0</span></b><span>µSv/h</span></article>
+      </div>
+      <div class="alert-log" id="alertLog"></div>
+    </section>
+
+    <section id="download" class="download-section section-shell">
+      <div class="download-card">
+        <div class="download-copy">
+          <span class="section-kicker" data-i18n="androidApp">ANDROID APPLICATION</span>
+          <h2 data-i18n="downloadTitle">Mang VieRad theo bạn mọi lúc</h2>
+          <p data-i18n="downloadText">Tải APK VieRad hiện có để cài trên Android. Khi build bản app 2.2 đã sửa ngôn ngữ, chỉ cần thay file APK trong thư mục downloads.</p>
+          <div class="apk-meta"><span>APK</span><span id="apkVersion">v2.1-current</span><span id="apkSize">-- MB</span></div>
+          <a id="downloadApkLink" href="downloads/VieRad-current.apk" download class="primary-button large"><span>↓</span><span data-i18n="downloadForAndroid">TẢI CHO ANDROID</span></a>
+          <small data-i18n="installNote">Android có thể yêu cầu cho phép cài ứng dụng không rõ nguồn gốc khi cài APK trực tiếp.</small>
+        </div>
+        <div class="phone-preview">
+          <div class="phone-frame"><div class="phone-notch"></div><img src="assets/images/logo-mark.png" alt="VieRad"><small id="phoneStation">Trạm NEW</small><b id="phoneDose">--</b><span>µSv/h</span><div><em>CPS</em><strong id="phoneCps">--</strong></div><div><em>CPM</em><strong id="phoneCpm">--</strong></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="about-section section-shell">
+      <div class="about-image"><img src="assets/images/vierad_brand.png" alt="VieRad"></div>
+      <div class="about-copy">
+        <span class="section-kicker" data-i18n="aboutKicker">ABOUT VIERAD</span>
+        <h2 data-i18n="aboutTitle">Giám sát rõ ràng. Dữ liệu đáng tin cậy.</h2>
+        <p data-i18n="aboutText">VieRad được xây dựng để hỗ trợ theo dõi bức xạ theo thời gian thực bằng giao diện trực quan, số liệu lớn và khả năng truy cập chi tiết từng trạm. Website và ứng dụng cùng ưu tiên một nguyên tắc: không biến dữ liệu mẫu thành dữ liệu đo thật.</p>
+        <div class="feature-list">
+          <div><span>✓</span><p><b data-i18n="featureRealtime">Dữ liệu thời gian thực</b><small data-i18n="featureRealtimeText">Tự động làm mới từ API NEW.</small></p></div>
+          <div><span>✓</span><p><b data-i18n="featureDetail">Thông số đầy đủ</b><small data-i18n="featureDetailText">Dose, CPS, CPM, tổng số đếm, DHT và metadata.</small></p></div>
+          <div><span>✓</span><p><b data-i18n="featureHistory">Lịch sử nâng cao</b><small data-i18n="featureHistoryText">Lọc theo thời gian, mức cảnh báo, trạm và xuất/nhập dữ liệu.</small></p></div>
+          <div><span>✓</span><p><b data-i18n="featureBilingual">Song ngữ thật sự</b><small data-i18n="featureBilingualText">Toàn bộ chữ động, popup, tên trạm mặc định và thông báo đều đổi Việt/Anh.</small></p></div>
+        </div>
+        <div class="author-line"><span data-i18n="developedBy">Phát triển bởi</span> <b id="developerName">Dương Thảo Vy</b> · <span id="organizationName">HCMUS</span></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <a class="brand footer-brand" href="#home"><img src="assets/images/logo-mark.png" alt=""><span><b>Vie</b>Rad</span></a>
+    <p>Radiation Monitoring · Protecting Life</p>
+    <span>© 2026 VieRad</span>
+  </footer>
+
+  <div class="modal-backdrop" id="detailModal" aria-hidden="true">
+    <div class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="modal-header"><div><span class="section-kicker" data-i18n="stationDetails">STATION DETAILS</span><h2 id="detailTitle">Trạm NEW</h2></div><button id="closeModalButton" type="button" data-i18n-aria-label="close">×</button></div>
+      <div class="detail-hero"><div><small data-i18n="currentDose">SUẤT LIỀU HIỆN TẠI</small><strong id="detailDose">--</strong><span>µSv/h</span></div><b id="detailRisk">--</b></div>
+      <div class="detail-grid">
+        <div><small>CPS <span data-i18n="instant">tức thời</span></small><b id="detailCps">--</b></div>
+        <div><small>CPM <span data-i18n="instant">tức thời</span></small><b id="detailCpm">--</b></div>
+        <div><small>CPS <span data-i18n="average">trung bình</span></small><b id="detailCpsAvg">--</b></div>
+        <div><small>CPM <span data-i18n="average">trung bình</span></small><b id="detailCpmAvg">--</b></div>
+        <div><small data-i18n="averageDose">LIỀU TRUNG BÌNH</small><b id="detailDoseAvg">--</b></div>
+        <div><small data-i18n="totalCounts">TỔNG SỐ ĐẾM</small><b id="detailCounts">--</b></div>
+        <div><small data-i18n="temperature">NHIỆT ĐỘ</small><b id="detailTemp">--</b></div>
+        <div><small data-i18n="humidity">ĐỘ ẨM</small><b id="detailHumidity">--</b></div>
+      </div>
+      <div class="metadata-list">
+        <div><span data-i18n="timestamp">Dấu thời gian</span><b id="detailTime">--</b></div>
+        <div><span data-i18n="stationId">Mã trạm</span><b id="detailStationId">--</b></div>
+        <div><span>Connection ID</span><b id="detailConnection">--</b></div>
+        <div><span>DHT Error</span><b id="detailDht">--</b></div>
+        <div><span data-i18n="location">Vị trí</span><b id="detailAddress">--</b></div>
+        <div><span>API</span><b id="detailApi">--</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="settingsModal" aria-hidden="true">
+    <form class="detail-modal settings-modal" id="settingsForm" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modal-header"><div><span class="section-kicker" data-i18n="localSettings">LOCAL SETTINGS</span><h2 id="settingsTitle" data-i18n="settings">Cài đặt</h2></div><button id="closeSettingsButton" type="button" data-i18n-aria-label="close">×</button></div>
+      <div class="settings-grid">
+        <label class="wide"><span data-i18n="apiUrl">URL API</span><input id="settingsApiUrl" type="url" required></label>
+        <label><span data-i18n="stationNameVi">Tên trạm tiếng Việt</span><input id="settingsStationNameVi" type="text"></label>
+        <label><span data-i18n="stationNameEn">Tên trạm tiếng Anh</span><input id="settingsStationNameEn" type="text"></label>
+        <label class="wide"><span data-i18n="stationAddress">Địa điểm/mô tả</span><input id="settingsStationAddress" type="text"></label>
+        <label><span data-i18n="refreshSeconds">Chu kỳ cập nhật (giây)</span><input id="settingsRefreshSeconds" type="number" min="3" max="3600"></label>
+        <label><span data-i18n="historyLimit">Giới hạn lịch sử</span><input id="settingsHistoryLimit" type="number" min="100" max="10000"></label>
+        <label><span data-i18n="cautionThresholdLabel">Ngưỡng chú ý</span><input id="settingsCaution" type="number" min="0" step="0.001"></label>
+        <label><span data-i18n="warningThresholdLabel">Ngưỡng cảnh báo</span><input id="settingsWarning" type="number" min="0" step="0.001"></label>
+        <label><span data-i18n="dangerThresholdLabel">Ngưỡng nguy hiểm</span><input id="settingsDanger" type="number" min="0" step="0.001"></label>
+      </div>
+      <div class="settings-actions">
+        <button id="testApiButton" type="button" class="secondary-button" data-i18n="testApi">Kiểm tra API</button>
+        <button id="resetSettingsButton" type="button" class="text-button" data-i18n="resetDefaults">Khôi phục mặc định</button>
+        <button type="submit" class="primary-button" data-i18n="saveSettings">Lưu cài đặt</button>
+      </div>
+      <p class="settings-note" data-i18n="settingsLocalNote">Cài đặt này chỉ được lưu trên trình duyệt hiện tại.</p>
+    </form>
+  </div>
+
+  <div class="confirm-backdrop" id="confirmDialog" aria-hidden="true">
+    <div class="confirm-card" role="dialog" aria-modal="true"><h3 id="confirmTitle">--</h3><p id="confirmMessage">--</p><div><button id="confirmCancel" class="text-button" type="button" data-i18n="cancel">Hủy</button><button id="confirmOk" class="primary-button" type="button" data-i18n="confirm">Xác nhận</button></div></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
